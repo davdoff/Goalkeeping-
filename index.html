@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="description" content="Daily goal tracker with rewards">
+    <link rel="manifest" href="manifest.json">
+    <title>Goalkeeping</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 30px rgba(124, 58, 237, 0.2);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .coin-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #fbbf24;
+            font-size: 16px;
+            font-weight: 600;
+            background: rgba(251, 191, 36, 0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .coin-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+        }
+
+        .coin-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .add-goal-btn {
+            background: rgba(124, 58, 237, 0.1);
+            border: 2px solid #7c3aed;
+            color: #a78bfa;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .add-goal-btn:hover {
+            background: #7c3aed;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+        }
+
+        .add-goal-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px 20px 0;
+            background: transparent;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: rgba(26, 26, 26, 0.4);
+            border: 1.5px solid rgba(124, 58, 237, 0.2);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+        }
+
+        .tab:hover {
+            background: rgba(26, 26, 26, 0.6);
+            color: #9ca3af;
+        }
+
+        .tab.active {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.5);
+            color: #a78bfa;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .card {
+            background: transparent;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        .section-title {
+            color: #a78bfa;
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .goals-footer {
+            padding: 20px;
+            background: transparent;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1.5px solid rgba(124, 58, 237, 0.3);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(26, 26, 26, 0.6);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder {
+            color: #6b7280;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #7c3aed;
+            background: rgba(26, 26, 26, 0.9);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: 1.5px solid #7c3aed;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            border: 1.5px solid #7c3aed;
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0px);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1.5px solid #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1.5px solid #10b981;
+        }
+
+        .btn-success:hover {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .goal-list,
+        .shop-list {
+            list-style: none;
+        }
+
+        .shop-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 360px) {
+            .shop-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 16px;
+            background: rgba(26, 26, 26, 0.6);
+            border: 1.5px solid rgba(124, 58, 237, 0.3);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            touch-action: pan-y;
+        }
+
+        .goal-item.in-preset {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(251, 191, 36, 0.05);
+        }
+
+        .goal-item.in-preset::before {
+            content: '⭐';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+        }
+
+        .goal-item.swiping {
+            transition: transform 0.1s ease-out;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .goal-item.swiping .swipe-indicator {
+            opacity: 1;
+        }
+
+        .shop-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 16px;
+            background: rgba(26, 26, 26, 0.6);
+            border: 1.5px solid rgba(124, 58, 237, 0.3);
+            border-radius: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            aspect-ratio: 1;
+            text-align: center;
+        }
+
+        .goal-item:hover {
+            background: rgba(26, 26, 26, 0.8);
+            border-color: rgba(124, 58, 237, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+        }
+
+        .shop-item:hover {
+            background: rgba(26, 26, 26, 0.8);
+            border-color: rgba(124, 58, 237, 0.5);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.2);
+        }
+
+        .goal-item.completed {
+            opacity: 0.5;
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .goal-item.completed:hover {
+            opacity: 0.6;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .goal-item.completed .goal-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #7c3aed;
+            flex-shrink: 0;
+        }
+
+        .goal-text {
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #e5e7eb;
+        }
+
+        .shop-text {
+            font-size: 15px;
+            line-height: 1.4;
+            color: #e5e7eb;
+            font-weight: 500;
+            word-break: break-word;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .goal-reward {
+            color: #fbbf24;
+            font-weight: 600;
+            font-size: 13px;
+            background: rgba(251, 191, 36, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .shop-item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .delete-btn {
+            padding: 8px 14px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .delete-btn:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            transform: scale(1.02);
+        }
+
+        .shop-price {
+            color: #fbbf24;
+            font-weight: 600;
+            font-size: 16px;
+            background: rgba(251, 191, 36, 0.15);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .buy-btn {
+            padding: 10px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1.5px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .buy-btn:hover {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .buy-btn:disabled {
+            border-color: rgba(75, 85, 99, 0.3);
+            color: #6b7280;
+            background: rgba(75, 85, 99, 0.05);
+            cursor: not-allowed;
+        }
+
+        .buy-btn:disabled:hover {
+            background: rgba(75, 85, 99, 0.05);
+            color: #6b7280;
+        }
+
+        .shop-item .delete-btn {
+            width: 100%;
+            padding: 8px 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.90);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            position: relative;
+            background: linear-gradient(145deg, rgba(30, 58, 138, 0.15) 0%, rgba(10, 10, 10, 0.95) 50%, rgba(124, 58, 237, 0.15) 100%);
+            border: 2px solid rgba(124, 58, 237, 0.4);
+            border-radius: 24px;
+            padding: 36px;
+            max-width: 90%;
+            width: 420px;
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.6),
+                0 0 120px rgba(124, 58, 237, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: radial-gradient(circle at top, rgba(124, 58, 237, 0.2) 0%, transparent 70%);
+            border-radius: 24px 24px 0 0;
+            pointer-events: none;
+        }
+
+        .modal-header {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .modal-title {
+            color: #e9d5ff;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(124, 58, 237, 0.5);
+        }
+
+        .close-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1.5px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .close-btn:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-color: #ef4444;
+            transform: rotate(90deg) scale(1.05);
+            box-shadow: 0 6px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .close-btn:active {
+            transform: rotate(90deg) scale(0.95);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .new-day-btn {
+            margin-top: 16px;
+        }
+
+        .shop-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .shop-input-group input[type="number"] {
+            width: 110px;
+        }
+
+        .goal-list,
+        .shop-list {
+            animation: fadeInList 0.4s ease-out;
+        }
+
+        @keyframes fadeInList {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px 16px;
+            }
+
+            .header h1 {
+                font-size: 19px;
+            }
+
+            .coin-display {
+                font-size: 14px;
+                padding: 6px 10px;
+            }
+
+            .coin-icon {
+                font-size: 18px;
+            }
+
+            .add-goal-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 20px 16px;
+            }
+
+            .goal-item,
+            .shop-item {
+                padding: 16px 14px;
+            }
+
+            .goal-text,
+            .shop-text {
+                font-size: 14px;
+            }
+
+            .input-group,
+            .shop-input-group {
+                flex-direction: column;
+            }
+
+            .shop-input-group input[type="number"] {
+                width: 100%;
+            }
+
+            .modal-content {
+                width: 92%;
+                padding: 24px;
+                border-radius: 18px;
+            }
+
+            .modal-title {
+                font-size: 20px;
+            }
+
+            .tabs {
+                padding: 12px 16px 0;
+                gap: 6px;
+            }
+
+            .tab {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .shop-list {
+                gap: 10px;
+            }
+
+            .shop-item {
+                padding: 16px 12px;
+                gap: 10px;
+            }
+
+            .shop-text {
+                font-size: 14px;
+            }
+
+            .shop-price {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+
+        .install-prompt {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(30, 58, 138, 0.15) 100%);
+            border: 1.5px solid rgba(124, 58, 237, 0.3);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .install-prompt p {
+            color: #a78bfa;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="coin-display">
+                <span class="coin-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="coinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#ffed4e;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#d4af37;stop-opacity:1" />
+                            </linearGradient>
+                            <radialGradient id="coinShine" cx="35%" cy="35%">
+                                <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                                <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="45" fill="url(#coinGradient)" stroke="#b8860b" stroke-width="3"/>
+                        <circle cx="50" cy="50" r="45" fill="url(#coinShine)"/>
+                        <circle cx="50" cy="50" r="35" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.5"/>
+                        <text x="50" y="65" font-size="45" font-weight="bold" text-anchor="middle" fill="#b8860b">$</text>
+                    </svg>
+                </span>
+                <span id="coinBalance">0</span>
+            </div>
+            <h1 id="headerTitle">Goalkeeping</h1>
+            <button class="add-goal-btn" id="addBtn">+</button>
+        </div>
+
+        <div id="installPrompt" class="install-prompt hidden">
+            <p>Install this app to your home screen!</p>
+            <button id="installBtn" class="btn btn-primary">Install App</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="goals">Goals</button>
+            <button class="tab" data-tab="shop">Shop</button>
+        </div>
+
+        <div id="goalsTab" class="tab-content">
+            <div class="card">
+                <ul id="goalList" class="goal-list">
+                    <div class="empty-state">No goals yet. Click + to add!</div>
+                </ul>
+            </div>
+            <div class="goals-footer">
+                <div style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 12px; padding: 0 10px;">
+                    💡 Swipe right on any goal to add it to your daily preset
+                </div>
+                <button class="btn btn-danger btn-full" id="newDayBtn">🌅 Start New Day</button>
+            </div>
+        </div>
+
+        <div id="shopTab" class="tab-content hidden">
+            <div class="card">
+                <ul id="shopList" class="shop-list">
+                    <div class="empty-state">No items yet. Click + to add!</div>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Goal Modal -->
+    <div id="addGoalModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">✨ Add New Goal</h2>
+                <button class="close-btn" id="closeAddGoalModal">&times;</button>
+            </div>
+            <button class="btn btn-success btn-full" id="loadPresetBtn" style="margin-bottom: 20px;">⭐ Load Daily Preset</button>
+            <div class="input-group">
+                <input type="text" id="goalInput" placeholder="What do you want to achieve?">
+            </div>
+            <div class="input-group">
+                <input type="number" id="goalRewardInput" placeholder="Reward amount" min="1" value="10">
+            </div>
+            <button class="btn btn-primary btn-full" id="addGoalBtn">Add Goal</button>
+        </div>
+    </div>
+
+    <!-- Add Shop Item Modal -->
+    <div id="addShopItemModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🛍️ Add Shop Item</h2>
+                <button class="close-btn" id="closeAddShopItemModal">&times;</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="itemNameInput" placeholder="Item name...">
+            </div>
+            <div class="input-group">
+                <input type="number" id="itemPriceInput" placeholder="Price in coins" min="1">
+            </div>
+            <button class="btn btn-primary btn-full" id="addItemBtn">Add to Shop</button>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        let goals = [];
+        let shopItems = [];
+        let coins = 0;
+        let deferredPrompt;
+        let currentTab = 'goals';
+        let goalPreset = []; // Store preset goals
+
+        // Load data from localStorage
+        function loadData() {
+            const savedGoals = localStorage.getItem('goals');
+            const savedShopItems = localStorage.getItem('shopItems');
+            const savedCoins = localStorage.getItem('coins');
+            const savedPreset = localStorage.getItem('goalPreset');
+
+            if (savedGoals) goals = JSON.parse(savedGoals);
+            if (savedShopItems) shopItems = JSON.parse(savedShopItems);
+            if (savedCoins) coins = parseInt(savedCoins);
+            if (savedPreset) goalPreset = JSON.parse(savedPreset);
+
+            updateUI();
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('goals', JSON.stringify(goals));
+            localStorage.setItem('shopItems', JSON.stringify(shopItems));
+            localStorage.setItem('coins', coins.toString());
+            localStorage.setItem('goalPreset', JSON.stringify(goalPreset));
+        }
+
+        // Update coin display
+        function updateCoinDisplay() {
+            document.getElementById('coinBalance').textContent = coins;
+        }
+
+        // Add goal
+        function addGoal() {
+            const input = document.getElementById('goalInput');
+            const rewardInput = document.getElementById('goalRewardInput');
+            const text = input.value.trim();
+            const reward = parseInt(rewardInput.value) || 10;
+
+            if (text) {
+                goals.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    reward: reward
+                });
+                input.value = '';
+                rewardInput.value = '10';
+                saveData();
+                updateGoalList();
+            }
+        }
+
+        // Toggle goal completion
+        function toggleGoal(id) {
+            const goal = goals.find(g => g.id === id);
+            if (goal) {
+                goal.completed = !goal.completed;
+
+                // Award or remove coins
+                const reward = goal.reward || 10;
+                if (goal.completed) {
+                    coins += reward;
+                } else {
+                    coins = Math.max(0, coins - reward);
+                }
+
+                saveData();
+                updateGoalList();
+                updateCoinDisplay();
+            }
+        }
+
+        // Delete goal
+        function deleteGoal(id) {
+            const goal = goals.find(g => g.id === id);
+            if (goal && goal.completed) {
+                const reward = goal.reward || 10;
+                coins = Math.max(0, coins - reward);
+            }
+            goals = goals.filter(g => g.id !== id);
+            saveData();
+            updateGoalList();
+            updateCoinDisplay();
+        }
+
+        // Check if goal text and reward match a preset goal
+        function isInPreset(text, reward) {
+            return goalPreset.some(p => p.text === text && p.reward === reward);
+        }
+
+        // Toggle goal in preset
+        function togglePreset(text, reward) {
+            const index = goalPreset.findIndex(p => p.text === text && p.reward === reward);
+            if (index >= 0) {
+                goalPreset.splice(index, 1);
+            } else {
+                goalPreset.push({ text, reward });
+            }
+            saveData();
+            updateGoalList();
+        }
+
+        // Load preset goals
+        function loadPreset() {
+            if (goalPreset.length === 0) {
+                alert('No preset goals saved yet! Swipe right on any goal to add it to your preset.');
+                return;
+            }
+
+            goalPreset.forEach(presetGoal => {
+                // Check if this goal already exists in today's goals
+                const exists = goals.some(g =>
+                    g.text === presetGoal.text &&
+                    g.reward === presetGoal.reward &&
+                    !g.completed
+                );
+
+                if (!exists) {
+                    goals.push({
+                        id: Date.now() + Math.random(), // Ensure unique IDs
+                        text: presetGoal.text,
+                        completed: false,
+                        reward: presetGoal.reward
+                    });
+                }
+            });
+
+            saveData();
+            updateGoalList();
+            closeAddGoalModal();
+        }
+
+        // Update goal list
+        function updateGoalList() {
+            const list = document.getElementById('goalList');
+
+            if (goals.length === 0) {
+                list.innerHTML = '<div class="empty-state">No goals yet. Add some goals above!</div>';
+                return;
+            }
+
+            const coinSVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; vertical-align: middle;">
+                <defs>
+                    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#ffed4e;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#d4af37;stop-opacity:1" />
+                    </linearGradient>
+                    <radialGradient id="coinGlow" cx="35%" cy="35%">
+                        <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                        <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="url(#coinGrad)" stroke="#b8860b" stroke-width="3"/>
+                <circle cx="50" cy="50" r="45" fill="url(#coinGlow)"/>
+                <circle cx="50" cy="50" r="35" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.5"/>
+                <text x="50" y="65" font-size="45" font-weight="bold" text-anchor="middle" fill="#b8860b">$</text>
+            </svg>`;
+
+            list.innerHTML = goals.map(goal => {
+                const reward = goal.reward || 10;
+                const inPreset = isInPreset(goal.text, reward);
+                return `
+                    <li class="goal-item ${goal.completed ? 'completed' : ''} ${inPreset ? 'in-preset' : ''}" data-goal-id="${goal.id}" data-goal-text="${goal.text.replace(/"/g, '&quot;')}" data-goal-reward="${reward}">
+                        <span class="swipe-indicator">⭐</span>
+                        <input type="checkbox"
+                               class="checkbox"
+                               ${goal.completed ? 'checked' : ''}
+                               onchange="toggleGoal(${goal.id})">
+                        <span class="goal-text">${goal.text}</span>
+                        <span class="goal-reward">+${reward} ${coinSVG}</span>
+                        <button class="delete-btn" onclick="deleteGoal(${goal.id})">Delete</button>
+                    </li>
+                `;
+            }).join('');
+
+            // Add swipe gesture handlers
+            document.querySelectorAll('.goal-item').forEach(item => {
+                let startX = 0;
+                let currentX = 0;
+                let isSwiping = false;
+
+                item.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    isSwiping = true;
+                }, { passive: true });
+
+                item.addEventListener('touchmove', (e) => {
+                    if (!isSwiping) return;
+                    currentX = e.touches[0].clientX;
+                    const diff = currentX - startX;
+
+                    if (diff > 20) {
+                        item.classList.add('swiping');
+                        item.style.transform = `translateX(${Math.min(diff, 60)}px)`;
+                    }
+                }, { passive: true });
+
+                item.addEventListener('touchend', (e) => {
+                    if (!isSwiping) return;
+                    const diff = currentX - startX;
+
+                    item.classList.remove('swiping');
+                    item.style.transform = '';
+
+                    if (diff > 80) {
+                        const text = item.dataset.goalText;
+                        const reward = parseInt(item.dataset.goalReward);
+                        togglePreset(text, reward);
+                    }
+
+                    isSwiping = false;
+                    startX = 0;
+                    currentX = 0;
+                }, { passive: true });
+            });
+        }
+
+        // Start new day
+        function startNewDay() {
+            if (confirm('This will clear all completed goals. Continue?')) {
+                goals = goals.filter(g => !g.completed);
+                saveData();
+                updateGoalList();
+            }
+        }
+
+        // Add shop item
+        function addShopItem() {
+            const nameInput = document.getElementById('itemNameInput');
+            const priceInput = document.getElementById('itemPriceInput');
+            const name = nameInput.value.trim();
+            const price = parseInt(priceInput.value);
+
+            if (name && price > 0) {
+                shopItems.push({
+                    id: Date.now(),
+                    name: name,
+                    price: price
+                });
+                nameInput.value = '';
+                priceInput.value = '';
+                saveData();
+                updateShopList();
+            }
+        }
+
+        // Buy item
+        function buyItem(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (item && coins >= item.price) {
+                if (confirm(`Buy ${item.name} for ${item.price} coins?`)) {
+                    coins -= item.price;
+                    saveData();
+                    updateCoinDisplay();
+                    updateShopList();
+                }
+            }
+        }
+
+        // Delete shop item
+        function deleteShopItem(id) {
+            if (confirm('Delete this item from shop?')) {
+                shopItems = shopItems.filter(i => i.id !== id);
+                saveData();
+                updateShopList();
+            }
+        }
+
+        // Update shop list
+        function updateShopList() {
+            const list = document.getElementById('shopList');
+
+            if (shopItems.length === 0) {
+                list.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">No items yet. Click + to add!</div>';
+                return;
+            }
+
+            const coinSVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px; vertical-align: middle;">
+                <defs>
+                    <linearGradient id="shopCoinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#ffed4e;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#d4af37;stop-opacity:1" />
+                    </linearGradient>
+                    <radialGradient id="shopCoinGlow" cx="35%" cy="35%">
+                        <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                        <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="url(#shopCoinGrad)" stroke="#b8860b" stroke-width="3"/>
+                <circle cx="50" cy="50" r="45" fill="url(#shopCoinGlow)"/>
+                <circle cx="50" cy="50" r="35" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.5"/>
+                <text x="50" y="65" font-size="45" font-weight="bold" text-anchor="middle" fill="#b8860b">$</text>
+            </svg>`;
+
+            list.innerHTML = shopItems.map(item => `
+                <li class="shop-item">
+                    <span class="shop-text">${item.name}</span>
+                    <div class="shop-item-actions">
+                        <span class="shop-price">${item.price} ${coinSVG}</span>
+                        <button class="buy-btn"
+                                onclick="buyItem(${item.id})"
+                                ${coins < item.price ? 'disabled' : ''}>
+                            Buy
+                        </button>
+                        <button class="delete-btn" onclick="deleteShopItem(${item.id})">Delete</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Update UI
+        function updateUI() {
+            updateCoinDisplay();
+            updateGoalList();
+            updateShopList();
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            currentTab = tabName;
+
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update tab content
+            document.getElementById('goalsTab').classList.toggle('hidden', tabName !== 'goals');
+            document.getElementById('shopTab').classList.toggle('hidden', tabName !== 'shop');
+
+            // Update header title
+            document.getElementById('headerTitle').textContent = tabName === 'goals' ? 'Goalkeeping' : 'Shop';
+        }
+
+        // Modal functions
+        function openAddGoalModal() {
+            document.getElementById('addGoalModal').classList.remove('hidden');
+        }
+
+        function closeAddGoalModal() {
+            document.getElementById('addGoalModal').classList.add('hidden');
+        }
+
+        function openAddShopItemModal() {
+            document.getElementById('addShopItemModal').classList.remove('hidden');
+        }
+
+        function closeAddShopItemModal() {
+            document.getElementById('addShopItemModal').classList.add('hidden');
+        }
+
+        function handleAddButtonClick() {
+            if (currentTab === 'goals') {
+                openAddGoalModal();
+            } else {
+                openAddShopItemModal();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('addBtn').addEventListener('click', handleAddButtonClick);
+        document.getElementById('closeAddGoalModal').addEventListener('click', closeAddGoalModal);
+        document.getElementById('closeAddShopItemModal').addEventListener('click', closeAddShopItemModal);
+        document.getElementById('loadPresetBtn').addEventListener('click', loadPreset);
+
+        document.getElementById('addGoalBtn').addEventListener('click', () => {
+            addGoal();
+            closeAddGoalModal();
+        });
+
+        document.getElementById('goalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addGoal();
+                closeAddGoalModal();
+            }
+        });
+
+        document.getElementById('goalRewardInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addGoal();
+                closeAddGoalModal();
+            }
+        });
+
+        document.getElementById('newDayBtn').addEventListener('click', startNewDay);
+
+        document.getElementById('addItemBtn').addEventListener('click', () => {
+            addShopItem();
+            closeAddShopItemModal();
+        });
+
+        document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('itemPriceInput').value) {
+                addShopItem();
+                closeAddShopItemModal();
+            }
+        });
+
+        document.getElementById('itemPriceInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('itemNameInput').value) {
+                addShopItem();
+                closeAddShopItemModal();
+            }
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchTab(tab.dataset.tab);
+            });
+        });
+
+        // Close modals when clicking outside
+        document.getElementById('addGoalModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addGoalModal') closeAddGoalModal();
+        });
+
+        document.getElementById('addShopItemModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addShopItemModal') closeAddShopItemModal();
+        });
+
+        // PWA Install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.remove('hidden');
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('installPrompt').classList.add('hidden');
+            }
+        });
+
+        // Register service worker (commented out for easier development)
+        // Uncomment this when you're ready to install the PWA
+        /*
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+        */
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
