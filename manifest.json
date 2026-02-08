@@ -3,6 +3,7 @@
   "short_name": "Goalkeeping",
   "description": "Track daily goals and earn rewards",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#1e3a8a",
